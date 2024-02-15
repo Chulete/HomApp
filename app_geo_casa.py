@@ -6,7 +6,7 @@ import folium
 from streamlit_folium import st_folium
 
 # Importo los ficheros
-df_barrios = gpd.read_parquet("C:/Users/34610/Desktop/Master/1-Semestre/Proyecto_6/data/barrios.parquet")
+df_barrios = gpd.read_parquet("https://github.com/Chulete/HomApp/blob/master/data/barrios.parquet")
 df_pisos = gpd.read_parquet("C:/Users/34610/Desktop/Master/1-Semestre/Proyecto_6/data/pisos.parquet")
 
 
