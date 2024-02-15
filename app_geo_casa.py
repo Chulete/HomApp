@@ -19,6 +19,7 @@ def main():
         <h4 style="color:white;text-align:center;">App para encontrar tu lugar</h4>
         </div>
         ''')
+    st.info('App creada por Jesús Tejedo durante el Máster de Data Science de MBIT School')
 
     #st.header('HomeApp')
     st.write('''Con esta app podrás filtrar mediante la barra lateral de la izquierda por barrios, 
