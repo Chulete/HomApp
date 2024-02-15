@@ -1,5 +1,4 @@
 import pandas as pd
-!pip install geopandas
 import geopandas as gpd
 import streamlit as st
 import streamlit.components.v1 as stc
