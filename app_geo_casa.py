@@ -6,12 +6,30 @@ import folium
 from streamlit_folium import st_folium
 
 # Importo los ficheros
-df_barrios = gpd.read_parquet("https://github.com/Chulete/HomApp/blob/master/data/barrios.parquet")
-df_pisos = gpd.read_parquet("https://github.com/Chulete/HomApp/blob/master/data/pisos.parquet")
+df_barrios = pd.read_parquet("C:/Users/34610/Desktop/Master/1-Semestre/Proyecto_6/data/barrios.parquet")
+df_pisos = pd.read_parquet("C:/Users/34610/Desktop/Master/1-Semestre/Proyecto_6/data/pisos.parquet")
 
 
 
 def main():
+
+    # Realizo la transformación inversa de la columna 'coord'
+    pisos = (
+        df_pisos
+        .assign(
+            coord=lambda df: gpd.GeoSeries.from_wkt(df_pisos.coord)
+            )
+        )
+
+    # Realizo la transformación inversa de la columna 'geometry'
+    barrios = (
+        df_barrios
+        .assign(
+            geometry=lambda df: gpd.GeoSeries.from_wkt(df_barrios.geometry)
+            )
+        )
+
+
     # Título y literatura de la App
     stc.html('''
         <div style="background-color:MediumSeaGreen;padding:10px;border-radius:10px">
@@ -30,26 +48,29 @@ def main():
     st.subheader('Mapa')
 
     # Filto por barrios
-    barrios_disponibles = df_barrios['neighbourhood'].unique().tolist()
+    # Genero una lista para poder mostrarla en el desplegable
+    barrios_disponibles = barrios['neighbourhood'].unique().tolist()
     barrio_seleccionado = st.sidebar.selectbox('Barrios', barrios_disponibles)
 
     # Filtro por habitación
-    tipos_habitacion = df_pisos['room_type'].unique().tolist()
+    # Genero una lista para poder mostrarla en el desplegable
+    tipos_habitacion = pisos['room_type'].unique().tolist()
     tipo_habitacion_seleccionado = st.sidebar.selectbox('Tipo de habitación', tipos_habitacion)
 
-    # Filtro por precio
+    # Filtro por precio, columna creada en la libreta de 'Jupyter'
+    # Genero una lista para poder mostrarla en el desplegable
     precios = df_pisos['price_sensation'].unique().tolist()
     precio = st.sidebar.selectbox('Precio', precios)
 
-    # Uno los filtros para que se unan en un solo mapa
-    df_filtrado = df_pisos[(df_pisos['room_type'] == tipo_habitacion_seleccionado) & 
-    (df_pisos['price_sensation'] == precio) &
-                           (df_pisos['coord'].apply(
+    # Uno todos los filtros generados anteriormente para que se unan en un solo mapa
+    df_filtrado = pisos[(df_pisos['room_type'] == tipo_habitacion_seleccionado) & 
+    (pisos['price_sensation'] == precio) &
+                           (pisos['coord'].apply(
                             lambda geom: geom.within(
-                                df_barrios[df_barrios['neighbourhood'] == barrio_seleccionado]['geometry'].iloc[0])))]
+                                barrios[barrios['neighbourhood'] == barrio_seleccionado]['geometry'].iloc[0])))]
 
     # Genero el mapa
-    mapa = folium.Map(location=[40.4167, -3.70325], zoom_start=10, width=800, height=800)
+    mapa = folium.Map(location=[40.4167, -3.70325], zoom_start=14, width=800, height=800)
 
     for index, row in df_filtrado.iterrows():
         folium.Marker(
@@ -59,9 +80,10 @@ def main():
 
     st_folium(mapa)
 
-    # Creo visualización de posibles zonas
+    # Creo una lista de los barrios entre los que se puede escoger
     st.subheader('Lista de los barrios disponibles en la app')
 
+    # Divido en tres columnas todos los barrios de la lista para crear tres columnas del mismos tamaño
     lista_barrios = df_barrios.neighbourhood.unique()
     elem_por_columna = len(lista_barrios) // 3
 
@@ -76,8 +98,6 @@ def main():
             st.write(parte2)
         with col3:
             st.write(parte3)
-
-        #st.write([parte1, parte2, parte3])
 
 if __name__ == '__main__':
     main()
